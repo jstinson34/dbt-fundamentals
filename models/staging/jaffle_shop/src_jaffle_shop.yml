@@ -1,0 +1,42 @@
+version: 2
+
+sources:
+  - name: jaffle_shop
+    database: raw
+    schema: jaffle_shop
+    tables:
+      - name: customers
+      - name: orders
+models:
+  - name: stg_customers
+    description: Staged customer data from our jaffle shop app.
+    columns: 
+      - name: customer_id
+        description: Primary key for customers.
+        tests:
+          - unique
+          - not_null
+  - name: stg_orders
+    description: Staged order data from our jaffle shop app.
+    columns:
+      - name: order_id
+        description: Primary key for customers.
+        tests:
+          - unique
+          - not_null
+      - name: status
+        description: "{{ doc('order_status') }}"
+        tests:
+          - accepted_values:
+              values:
+                - completed
+                - shipped
+                - returned
+                - return_pending
+                - placed
+      - name: customer_id
+        description: Check for relationship between order.customer_id and customer_id from source doc (customers).
+        tests:
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
